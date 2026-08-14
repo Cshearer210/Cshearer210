@@ -2,25 +2,47 @@
 
 AI systems engineer. I work at the harness and loop layer, not the prompt layer.
 
-I built and run a production multi-agent platform that has operated unattended for months across
-three machines: a Windows workstation, an Ubuntu GPU server, and a cloud VPS. 62 agents, roughly
-97,000 lines of Python, single author. It researches, produces, verifies, and schedules real work
-for two businesses I own.
+I have published two open source Python packages that ask the same question of different things:
+**a check nobody has ever made fail is not a check.**
 
-The part I care most about is the layer most agent systems never get.
+- **[claimproof](https://github.com/Cshearer210/claimproof)** stops an AI coding agent ending its
+  turn on a claim it cannot back. `pip install claimproof`
+- **[deadcanary](https://github.com/Cshearer210/claimproof/tree/main/packages/deadcanary)** breaks
+  a dbt project's data on purpose to find the data tests that cannot fail. `pip install deadcanary`
+
+Behind them is a production multi-agent platform I built and run, which has operated unattended
+for months across three machines: a Windows workstation, an Ubuntu GPU server, and a cloud VPS.
+62 agents, roughly 97,000 lines of Python, single author. It researches, produces, verifies, and
+schedules real work for two businesses I own.
+
+### The two published findings
+
+**Agents claim success far more often than they earn it.** Measured across 73,269 real agent runs,
+**69.8% of 18,008 confident claims had resolved nothing** against the maintainers' own test suites.
+Claims carrying no evidence failed 83.0% of the time against 69.2% for claims that showed
+something, so an agent that shows its work is measurably more likely to be right. Method, limits,
+and the script that reproduces it: [FINDINGS.md](https://github.com/Cshearer210/claimproof/blob/main/FINDINGS.md).
+
+**A data test green every morning for two years is green for one of two reasons: the data is
+healthy, or the test cannot fail.** The sentence reads identically either way and almost nobody
+checks. On dbt-labs' own jaffle-shop template, **6 of 20 green tests cannot be made to fail by any
+corruption in the catalogue** — among them `unique_orders_order_id` and `not_null_orders_order_id`,
+the two most common tests in dbt. On a third project every test *could* fail, and the suite still
+missed **182 of the 255 corruptions applied, 71%**. That is the more useful result and the less
+flattering one.
 
 ### Reliability and evals
 
 Agents claim work is finished that isn't. Everything I build assumes that.
 
-- **118 scripts carry their own selftest.** A gate is not trusted until it has been made to fail
+- **253 scripts carry their own self-test.** A gate is not trusted until it has been made to fail
   on purpose. A check that has never failed proves nothing.
-- **A daily regression harness of 18 checks asserts against live system state, not source code.**
+- **A daily regression harness of 76 checks asserts against live system state, not source code.**
   Code does not decay. Reality does. A fix that quietly stopped working gets caught here rather
   than assumed to still hold.
 - **UNKNOWN is a distinct result that never counts as a pass.** Absent-and-fine and
   present-and-fine must never produce the same output.
-- **58 gates mechanically block non-compliant agent output before it ships**, rather than relying
+- **Gates mechanically block non-compliant agent output before it ships**, rather than relying
   on the model to remember a rule.
 
 The bug that shaped all of it: a content quality gate defaulted to passing everything once its
@@ -42,14 +64,15 @@ looked exactly like success. That class of silent degradation is what I build ag
 
 ### Memory, graph, and context
 
-- A memory architecture over structured records, a 5,500 note knowledge base, and a 484 document
-  corpus, with a derived index rebuilt every 30 minutes and pre-compaction snapshots that persist
-  open work to disk so nothing is lost when context is truncated. Retrieval returns the passage,
-  not the filename.
+- A memory architecture over 204 structured records, a 5,500 note knowledge base, and a 484
+  document corpus, with a derived index rebuilt every 30 minutes and pre-compaction snapshots that
+  persist open work to disk so nothing is lost when context is truncated. Retrieval returns the
+  passage, not the filename.
 - A code knowledge graph resolving 6,424 dependency edges across 2,779 files, so the blast radius
   of a change is queryable before the change is made.
 - Context engineering under measured token budgets: I measured what always-on instructions cost
-  per session, then scoped most of them to load only for the work they govern.
+  per session, then scoped 36 of 70 rule files to load only for the work they govern, which saves
+  roughly 134,000 tokens a session.
 
 ### Local inference
 
