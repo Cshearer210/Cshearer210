@@ -86,8 +86,8 @@ enforced by hard daily and monthly spend caps.
 Extraction chemist, self-taught, same as the software. I was hired to commission a $500,000
 cryogenic ethanol and wiped film extraction plant after three previous hires could not run it.
 The documentation was in Mandarin and specified an incorrect build. I diagnosed the fault, bought
-$5,000 in parts, re-plumbed the line, and took it from 200 pounds of biomass processed in two
-years to 2,000 pounds per week.
+$5,000 in parts, re-plumbed the line, and brought it into continuous production for the first
+time.
 
 Different domain, same job: figure out why the thing does not work when nobody else could, and
 make it hold.
