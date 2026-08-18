@@ -15,21 +15,18 @@ for months across three machines: a Windows workstation, an Ubuntu GPU server, a
 62 agents, roughly 97,000 lines of Python, single author. It researches, produces, verifies, and
 schedules real work for two businesses I own.
 
-### The two published findings
+### What the two packages do
 
-**Agents claim success far more often than they earn it.** Measured across 73,269 real agent runs,
-**69.8% of 18,008 confident claims had resolved nothing** against the maintainers' own test suites.
-Claims carrying no evidence failed 83.0% of the time against 69.2% for claims that showed
-something, so an agent that shows its work is measurably more likely to be right. Method, limits,
-and the script that reproduces it: [FINDINGS.md](https://github.com/Cshearer210/claimproof/blob/main/FINDINGS.md).
+**claimproof reads an agent's reply before its turn can end.** It refuses a completion claim
+that has no evidence near it: a test result, an exit code, a file and line, command output.
+Honest hedging passes on purpose, because a gate that punishes honesty teaches agents to be
+vague instead of accurate. Method and limits, for anyone evaluating it:
+[FINDINGS.md](https://github.com/Cshearer210/claimproof/blob/main/FINDINGS.md).
 
-**A data test green every morning for two years is green for one of two reasons: the data is
-healthy, or the test cannot fail.** The sentence reads identically either way and almost nobody
-checks. On dbt-labs' own jaffle-shop template, **6 of 20 green tests cannot be made to fail by any
-corruption in the catalogue** — among them `unique_orders_order_id` and `not_null_orders_order_id`,
-the two most common tests in dbt. On a third project every test *could* fail, and the suite still
-missed **182 of the 255 corruptions applied, 71%**. That is the more useful result and the less
-flattering one.
+**deadcanary asks the same question of a dbt project's data tests.** A test that has been green
+every morning for two years is green for one of two reasons: the data is healthy, or the test
+cannot fail, and the sentence reads identically either way. It corrupts a column on purpose,
+re-runs the suite, and names the tests that never noticed.
 
 ### Reliability and evals
 
