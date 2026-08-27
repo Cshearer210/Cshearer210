@@ -1,107 +1,131 @@
 # LA Lighthouse — 3-minute demo script
 
-Bookkeeping and POS system with a chatbot and automation layer, built for a retail
-business that was previously running its books in sprawling, disorganized Excel sheets.
+Bookkeeping and POS with a chatbot and automation layer, built for a **high-risk retail
+merchant** — hemp/CBD, blue lotus, and conventional products — that was previously running
+its books out of Excel.
 
-**Ownership:** Chris owns the software and source. The client owns their data. So the
-only constraint on this video is that no real figures, customer names, or transactions
-appear — the software itself is his to show.
+**Why this matters for this pitch:** a high-risk merchant category is very likely the
+reason this processor is talking to you at all. You have built the accounting and
+payments backbone for exactly the kind of merchant they underwrite. That belongs in the
+first twenty seconds, not buried at 2:10.
+
+**Ownership:** you own the software and source; the client owns their data. The only
+constraint on this video is that no real figures, vendors, or transactions appear.
 
 **Hard rule:** record against the seeded demo tenant. Run `demos/tools/preflight.py`
-first; it refuses a production host and fails on any denylisted term.
+first — it refuses a production host and fails on any denylisted term.
 
 ---
 
-## Beat 1 — The before (0:00–0:20)
+## Beat 1 — The merchant, and the mess (0:00–0:25)
 
-**Shot:** Open on a deliberately messy spreadsheet. Fabricated, but real in shape —
-merged cells, a column of hand-typed totals, three tabs that disagree.
+**Shot:** A deliberately messy spreadsheet. Fabricated but real in shape: merged cells,
+hand-typed totals, three tabs that disagree with each other.
 
-> Every number this business ran on lived in spreadsheets like this. Sales in one file,
-> inventory in another, and a person reconciling them by hand — finding the mistakes
-> weeks later, if at all.
+> This is a retail business selling hemp products, botanicals, and conventional goods —
+> the kind of merchant most software quietly refuses to serve. Their entire books lived
+> in spreadsheets like this. Sales in one file, vendors in another, and a person
+> reconciling by hand, finding mistakes weeks later if at all.
 
-Do not name the client. "A retail business" is enough, and it costs you nothing.
-
----
-
-## Beat 2 — One sale, all the way through (0:20–1:20)
-
-**Shot:** The core loop, uncut. Ring up a sale at the POS. Then cut straight to the
-books updating from it. No dissolve, no jump — the point is that nothing happened in
-between, because nothing needs to.
-
-> This is the same business now. A sale goes through the register —
->
-> `[SLOT: say what the operator actually does — scan, select, tender, done]`
->
-> — and the books are already correct. Inventory decremented, revenue posted, the
-> ledger balanced. Nobody re-keys anything into a spreadsheet at the end of the week,
-> because there is no spreadsheet at the end of the week.
-
-This is the beat that earns the video. One transaction, followed all the way to the
-ledger, does more than any feature tour.
+Do not name the client. "A retail business" costs you nothing and protects them.
 
 ---
 
-## Beat 3 — The chatbot and the automation layer (1:20–2:05)
+## Beat 2 — Thousands of transactions, in one motion (0:25–1:10)
 
-**Shot:** Type a request in plain language. Let the system make the change. Show the
-result on the affected screen.
+**Shot:** The hero shot. Drop a large file in. Let it run. Then cut to the places it
+landed — ledger, categories, vendor records — without touching anything in between.
 
-> It also takes instructions in plain language.
+> I can drop in thousands of transactions at once.
 >
-> `[SLOT: the actual request you'll type — e.g. "mark the 500mg tincture as discontinued
-> and move remaining stock to clearance." Pick one that touches two places at once, so
-> the payoff is visible.]`
+> `[SLOT: say the actual number and where the file comes from — a bank export, a
+> processor settlement file, a year of spreadsheet history.]`
 >
-> That is not a chatbot answering questions about the data. It changes the data, applies
-> the update everywhere it needs to land, and leaves a record of what it did.
+> They come in categorized, reconciled, and already propagated everywhere they need to
+> be. It pulls from their live spreadsheets, imports the bank feed, and exports back out
+> for whoever needs a file. Nobody re-keys anything.
 
-If it writes an audit entry, show it. A payment processor reads "who changed what, and
-can you prove it" as the whole ballgame.
+Show the *count* landing, not a progress bar. Volume is the argument here.
 
 ---
 
-## Beat 4 — Why you can trust it (2:05–2:40)
+## Beat 3 — It knows what's owed, and pays it (1:10–1:55)
 
-**Shot:** The fault injection. Break something on purpose, on camera, and show it caught.
+**Shot:** A vendor payment due notification, then the payment going out. Then type a
+plain-language instruction and show it applied.
 
-> Here's the part I'd want to know about if I were you. I don't wait for this system to
-> fail in production to find out how it fails. I break it on purpose, in a sandbox —
-> force the error, and confirm something actually catches it.
+> It also tracks what's owed. It knows when each vendor is due, it raises that before
+> the date rather than after, and it pays them directly from the business's bank account.
 >
-> `[SLOT: name one forced failure and what caught it — a bad import, a partial payment,
-> a sync that drops halfway.]`
+> And it takes instructions in plain language —
 >
-> A check nobody has ever made fail isn't a check. That's the same idea as the two
-> packages I've published, applied to a business's actual money.
+> `[SLOT: the request you'll actually type. Pick one that changes two places at once so
+> the payoff is visible on screen.]`
+>
+> That isn't a chatbot answering questions about the data. It changes the data, applies
+> the update everywhere it lands, and leaves a record of what it did.
+
+If there's an audit entry, show it. "Who changed what, and can you prove it" is the
+whole ballgame for this audience.
 
 ---
 
-## Beat 5 — Close (2:40–3:00)
+## Beat 4 — How I know it works (1:55–2:35)
 
-> Bookkeeping, point of sale, and the automation between them. Built solo, running in
-> production for a real business today.
+**Shot:** Fault injection. Break it on purpose, on camera, and show something catch it.
+
+> Here's what I'd want to know if I were you. I don't wait for a system holding a
+> business's money to fail in production to learn how it fails. I force the failure in a
+> sandbox and confirm something actually catches it.
 >
-> Everything you just saw was synthetic data — the system is mine, the numbers are not.
+> `[SLOT: one forced failure and what caught it — a malformed import, a partial payment,
+> a sync that dies halfway through.]`
+>
+> A check nobody has ever made fail is not a check. Same idea as the two packages I've
+> published, applied here to real money.
+
+---
+
+## Beat 5 — Close (2:35–3:00)
+
+> Point of sale, bookkeeping, payables, and the automation between them. It's built to
+> sit on top of whichever processor the merchant uses, so the gateway is a choice rather
+> than a rewrite.
+>
+> Built solo. Running in production today. Everything you just saw was synthetic — the
+> software is mine, the numbers are not.
 >
 > I'm Chris Shearer.
 
-Saying the synthetic-data line yourself, unprompted, does more for you than staying
-quiet about it. It shows a processor how you handle a client's data when nobody is
-checking.
+Say the synthetic-data line yourself, unprompted. It shows a processor how you treat a
+client's data when nobody is watching, which is a thing they cannot easily test for.
 
 ---
 
-## Still open
+## Be ready for these three questions
 
-**Integrations (Beat 3 or a card at 2:05).** What it connects to is the thing a
-processor most wants to know, because it tells them whether you can work inside their
-stack. Recognition is easier than recall — answer from the checklist in chat rather
-than trying to remember cold.
+They will come within a minute of the video ending. Have the answer before you send it.
 
-**Worth considering:** if the client sells tinctures and gummies, they may sit in a
-high-risk merchant category — which is plausibly why this processor is talking to you
-at all. If so, "I built the POS and books for a high-risk retailer" is the single most
-relevant sentence in the whole video, and belongs in Beat 1. Confirm before leaning on it.
+1. **"How do you hold the bank credentials for vendor payments?"** Anything touching ACH
+   origination gets scrutiny. Know whether you're initiating transfers, generating a
+   payment file the bank consumes, or driving a bank portal — the three have very
+   different risk profiles and they will know the difference.
+2. **"How do you handle a merchant in a restricted category?"** You have real answers
+   here from actually operating it. Have them ready rather than improvising.
+3. **"What happens on a partial or failed import?"** This is Beat 4 and you already have
+   it. Make sure the specific example you show is one you can talk about in depth.
+
+---
+
+## Fill the integration list without relying on memory
+
+Run this on the machine holding the source and paste the output back:
+
+```bash
+python3 demos/tools/find_integrations.py /path/to/lighthouse
+```
+
+It reports payment SDKs, banking and ACH libraries, accounting integrations,
+spreadsheet handling, hosts contacted, and exposed webhook routes. It prints credential
+**names** only, never values — the self-test plants a fake secret and asserts the value
+never reaches the output, so the report is safe to paste into a chat.
