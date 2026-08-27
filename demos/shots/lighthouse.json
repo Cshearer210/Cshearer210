@@ -1,0 +1,27 @@
+{
+  "_comment": "LA Lighthouse demo shot list. MUST point at the seeded demo tenant, never production. The runbook's pre-flight asserts this before you record.",
+  "base_url": "https://DEMO-TENANT-HOST",
+  "viewport": {"width": 1920, "height": 1080},
+  "steps": [
+    {"do": "goto", "url": "/login"},
+    {"do": "fill", "selector": "SELECTOR_EMAIL", "value": "demo@example.invalid"},
+    {"do": "fill", "selector": "SELECTOR_PASSWORD", "env": "DEMO_PASSWORD"},
+    {"do": "click", "selector": "SELECTOR_SUBMIT"},
+    {"do": "wait", "seconds": 3},
+
+    {"do": "caption", "text": "Synthetic tenant - no real client data", "seconds": 3},
+    {"do": "wait", "seconds": 2},
+
+    {"do": "caption", "text": "FEATURE 1 - fill in from intake", "seconds": 4},
+    {"do": "click", "selector": "SELECTOR_FEATURE_1"},
+    {"do": "wait", "seconds": 4},
+
+    {"do": "caption", "text": "FEATURE 2 - fill in from intake", "seconds": 4},
+    {"do": "click", "selector": "SELECTOR_FEATURE_2"},
+    {"do": "wait", "seconds": 4},
+
+    {"do": "caption", "text": "FEATURE 3 - fill in from intake", "seconds": 4},
+    {"do": "click", "selector": "SELECTOR_FEATURE_3"},
+    {"do": "wait", "seconds": 4}
+  ]
+}

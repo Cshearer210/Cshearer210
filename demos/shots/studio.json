@@ -1,0 +1,33 @@
+{
+  "_comment": "Studio demo shot list. Replace SELECTOR_* with real selectors and set base_url. Never put credentials here - use {\"env\": \"VAR_NAME\"}.",
+  "base_url": "http://localhost:PORT",
+  "viewport": {"width": 1920, "height": 1080},
+  "steps": [
+    {"do": "goto", "url": "/", "until": "networkidle"},
+    {"do": "wait", "seconds": 1},
+
+    {"do": "caption", "text": "62 agents. Three machines. One author.", "seconds": 4},
+    {"do": "goto", "url": "/SELECTOR_SYSTEM_MAP"},
+    {"do": "wait", "seconds": 3},
+
+    {"do": "caption", "text": "Eight loops, staggered intervals", "seconds": 3},
+    {"do": "click", "selector": "SELECTOR_LOOPS_TAB"},
+    {"do": "wait", "seconds": 3},
+    {"do": "scroll", "pixels": 500},
+    {"do": "wait", "seconds": 2},
+
+    {"do": "caption", "text": "Local inference, routed by task difficulty", "seconds": 3},
+    {"do": "click", "selector": "SELECTOR_MODEL_ROUTER"},
+    {"do": "wait", "seconds": 3},
+
+    {"do": "caption", "text": "118 checks against live state, not source", "seconds": 4},
+    {"do": "click", "selector": "SELECTOR_RUN_HARNESS"},
+    {"do": "wait", "seconds": 6},
+
+    {"do": "caption", "text": "Now break it on purpose", "seconds": 3},
+    {"do": "click", "selector": "SELECTOR_INJECT_FAULT"},
+    {"do": "wait", "seconds": 6},
+    {"do": "caption", "text": "The check that should have caught it, didn't", "seconds": 4},
+    {"do": "wait", "seconds": 3}
+  ]
+}
