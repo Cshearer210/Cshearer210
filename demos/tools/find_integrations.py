@@ -121,8 +121,34 @@ def scan(root: Path) -> dict:
     }
 
 
+def count_apis(report: dict) -> dict:
+    """Count distinct external APIs, the headline number for the demo.
+
+    Counted three ways because they answer different questions, and collapsing
+    them into one figure would be the kind of number that is impressive and
+    unverifiable. Say the one you can defend.
+    """
+    sdk_names = {n for hits in report["sdks"].values() for n in hits}
+    return {
+        "sdk_integrations": len(sdk_names),
+        "network_endpoints": len(report["external_hosts"]),
+        "inbound_routes": len(report["routes"]),
+        "credentials_configured": len(report["credential_names"]),
+    }
+
+
 def render(report: dict) -> str:
-    out = [f"Scanned {report['files_scanned']} files under {report['root']}", ""]
+    c = count_apis(report)
+    out = [
+        f"Scanned {report['files_scanned']} files under {report['root']}",
+        "",
+        "HEADLINE COUNTS  (say the one you can defend on a call)",
+        f"    {c['sdk_integrations']:>4}  distinct third-party SDKs / services integrated",
+        f"    {c['network_endpoints']:>4}  external API hosts actually contacted",
+        f"    {c['inbound_routes']:>4}  inbound routes this app exposes",
+        f"    {c['credentials_configured']:>4}  credentials configured",
+        "",
+    ]
 
     if report["sdks"]:
         out.append("EXTERNAL SYSTEMS")
@@ -178,6 +204,8 @@ def selftest() -> int:
         ("never prints secret VALUE", "SUPERSECRETVALUE" not in text),
         ("filters doc-site noise", "github.com" not in report["external_hosts"]),
         ("skips node_modules", report["files_scanned"] == 2),
+        ("counts distinct SDKs", count_apis(report)["sdk_integrations"] >= 3),
+        ("counts inbound routes", count_apis(report)["inbound_routes"] == 1),
     ]
     for name, ok in checks:
         print(f"  [{'PASS' if ok else 'FAIL'}] {name}")
@@ -205,7 +233,11 @@ def main() -> int:
         ap.error(f"{args.root} is not a directory")
 
     report = scan(args.root.resolve())
-    print(json.dumps(report, indent=2) if args.json else render(report))
+    if args.json:
+        report["counts"] = count_apis(report)
+        print(json.dumps(report, indent=2))
+    else:
+        print(render(report))
     return 0
 
 
