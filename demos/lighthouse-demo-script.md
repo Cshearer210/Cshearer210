@@ -1,79 +1,107 @@
-# LA Lighthouse — 3-minute demo script (structure + intake)
+# LA Lighthouse — 3-minute demo script
 
-**Status: skeleton.** I have no access to this app — it is not in any repo on your
-GitHub account and not on this machine. The beat structure, timing, and safety
-constraints below are done. The feature content needs the intake at the bottom.
+Bookkeeping and POS system with a chatbot and automation layer, built for a retail
+business that was previously running its books in sprawling, disorganized Excel sheets.
 
-**Hard constraint:** record against the seeded demo tenant only. Run
-`demos/tools/preflight.py` first; it refuses production hosts and denylisted terms.
+**Ownership:** Chris owns the software and source. The client owns their data. So the
+only constraint on this video is that no real figures, customer names, or transactions
+appear — the software itself is his to show.
+
+**Hard rule:** record against the seeded demo tenant. Run `demos/tools/preflight.py`
+first; it refuses a production host and fails on any denylisted term.
 
 ---
 
-## Beat 1 — Frame it as their problem (0:00–0:20)
+## Beat 1 — The before (0:00–0:20)
 
-**Shot:** the app's primary working screen, already loaded, nothing clicked yet.
+**Shot:** Open on a deliberately messy spreadsheet. Fabricated, but real in shape —
+merged cells, a column of hand-typed totals, three tabs that disagree.
 
-> `[SLOT: the operational problem this app solves, in one sentence, stated as a
-> cost — hours lost, errors caught late, a manual reconciliation someone does by
-> hand every Friday.]`
+> Every number this business ran on lived in spreadsheets like this. Sales in one file,
+> inventory in another, and a person reconciling them by hand — finding the mistakes
+> weeks later, if at all.
+
+Do not name the client. "A retail business" is enough, and it costs you nothing.
+
+---
+
+## Beat 2 — One sale, all the way through (0:20–1:20)
+
+**Shot:** The core loop, uncut. Ring up a sale at the POS. Then cut straight to the
+books updating from it. No dissolve, no jump — the point is that nothing happened in
+between, because nothing needs to.
+
+> This is the same business now. A sale goes through the register —
 >
-> This is the tool I built for it.
+> `[SLOT: say what the operator actually does — scan, select, tender, done]`
+>
+> — and the books are already correct. Inventory decremented, revenue posted, the
+> ledger balanced. Nobody re-keys anything into a spreadsheet at the end of the week,
+> because there is no spreadsheet at the end of the week.
 
-Do not open with "this is a dashboard I built." Open with the cost it removes.
-
----
-
-## Beat 2 — The one workflow that proves it (0:20–1:30)
-
-**Shot:** one task, start to finish, no cuts. Resist showing three features shallowly.
-
-> `[SLOT: narrate the single highest-value workflow end to end. What goes in,
-> what the system does, what comes out, and how long it used to take.]`
-
-Say the words "everything on screen is synthetic" once, here, plainly. A payment
-processor will respect that you said it before they had to ask.
+This is the beat that earns the video. One transaction, followed all the way to the
+ledger, does more than any feature tour.
 
 ---
 
-## Beat 3 — Integration surface (1:30–2:15)
+## Beat 3 — The chatbot and the automation layer (1:20–2:05)
 
-**Shot:** the boundary — API calls, imports/exports, whatever it talks to.
+**Shot:** Type a request in plain language. Let the system make the change. Show the
+result on the affected screen.
 
-> `[SLOT: what it connects to and how. Systems of record, file drops, webhooks,
-> auth model. This is the beat a processor cares most about, because it tells them
-> whether you can work inside their stack instead of beside it.]`
+> It also takes instructions in plain language.
+>
+> `[SLOT: the actual request you'll type — e.g. "mark the 500mg tincture as discontinued
+> and move remaining stock to clearance." Pick one that touches two places at once, so
+> the payoff is visible.]`
+>
+> That is not a chatbot answering questions about the data. It changes the data, applies
+> the update everywhere it needs to land, and leaves a record of what it did.
 
----
-
-## Beat 4 — How it fails safely (2:15–2:45)
-
-**Shot:** cause a real error on camera. Bad input, dropped connection, whatever
-is honest. Show it being caught.
-
-> `[SLOT: what happens when it breaks. What surfaces, what alarms, what never
-> silently passes.]`
-
-This is the beat that connects to the Studio video and to your two packages.
-Same argument, different app: a check nobody has made fail is not a check.
+If it writes an audit entry, show it. A payment processor reads "who changed what, and
+can you prove it" as the whole ballgame.
 
 ---
 
-## Beat 5 — Close (2:45–3:00)
+## Beat 4 — Why you can trust it (2:05–2:40)
 
-> Built solo, in production, running today. If you have something like this
-> nobody's had time to staff, that's the work I want.
+**Shot:** The fault injection. Break something on purpose, on camera, and show it caught.
+
+> Here's the part I'd want to know about if I were you. I don't wait for this system to
+> fail in production to find out how it fails. I break it on purpose, in a sandbox —
+> force the error, and confirm something actually catches it.
+>
+> `[SLOT: name one forced failure and what caught it — a bad import, a partial payment,
+> a sync that drops halfway.]`
+>
+> A check nobody has ever made fail isn't a check. That's the same idea as the two
+> packages I've published, applied to a business's actual money.
 
 ---
 
-## Intake — what I need to finish this
+## Beat 5 — Close (2:40–3:00)
 
-1. What does the app do, in one sentence, for someone who has never seen it?
-2. Who uses it, and what did they do before it existed?
-3. The single most impressive workflow, click by click.
-4. What it integrates with (APIs, imports, auth).
-5. What its most interesting failure mode is, and what catches it.
-6. Does the seeded demo tenant exist yet, or does it still need building?
-7. Is there anything in your agreement with LA Lighthouse covering the *software*
-   itself, not just their data? The synthetic-data plan handles the data cleanly.
-   Whether you can show a client's commissioned product to another prospect is a
-   separate question, and worth being sure of before this leaves your outbox.
+> Bookkeeping, point of sale, and the automation between them. Built solo, running in
+> production for a real business today.
+>
+> Everything you just saw was synthetic data — the system is mine, the numbers are not.
+>
+> I'm Chris Shearer.
+
+Saying the synthetic-data line yourself, unprompted, does more for you than staying
+quiet about it. It shows a processor how you handle a client's data when nobody is
+checking.
+
+---
+
+## Still open
+
+**Integrations (Beat 3 or a card at 2:05).** What it connects to is the thing a
+processor most wants to know, because it tells them whether you can work inside their
+stack. Recognition is easier than recall — answer from the checklist in chat rather
+than trying to remember cold.
+
+**Worth considering:** if the client sells tinctures and gummies, they may sit in a
+high-risk merchant category — which is plausibly why this processor is talking to you
+at all. If so, "I built the POS and books for a high-risk retailer" is the single most
+relevant sentence in the whole video, and belongs in Beat 1. Confirm before leaning on it.
