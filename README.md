@@ -12,7 +12,7 @@ I have published two open source Python packages that ask the same question of d
 
 Behind them is a production multi-agent platform I built and run, which has operated unattended
 for months across three machines: a Windows workstation, an Ubuntu GPU server, and a cloud VPS.
-62 agents, roughly 97,000 lines of Python, single author. It researches, produces, verifies, and
+68 agents, roughly 97,000 lines of Python, single author. It researches, produces, verifies, and
 schedules real work for two businesses I own.
 
 ### What the two packages do
@@ -32,7 +32,7 @@ re-runs the suite, and names the tests that never noticed.
 
 Agents claim work is finished that isn't. Everything I build assumes that.
 
-- **373 scripts carry their own self-test.** A gate is not trusted until it has been made to fail
+- **381 scripts carry their own self-test.** A gate is not trusted until it has been made to fail
   on purpose. A check that has never failed proves nothing.
 - **A daily regression harness of 192 checks asserts against live system state, not source code.**
   Code does not decay. Reality does. A fix that quietly stopped working gets caught here rather
@@ -61,14 +61,14 @@ looked exactly like success. That class of silent degradation is what I build ag
 
 ### Memory, graph, and context
 
-- A memory architecture over 204 structured records, a 5,500 note knowledge base, and a 484
+- A memory architecture over 187 structured records, a 9,600 note knowledge base, and a 609
   document corpus, with a derived index rebuilt every 30 minutes and pre-compaction snapshots that
   persist open work to disk so nothing is lost when context is truncated. Retrieval returns the
   passage, not the filename.
 - A code knowledge graph resolving 6,424 dependency edges across 2,779 files, so the blast radius
   of a change is queryable before the change is made.
 - Context engineering under measured token budgets: I measured what always-on instructions cost
-  per session, then scoped 68 of 79 rule files to load only for the work they govern, so the
+  per session, then scoped 69 of 80 rule files to load only for the work they govern, so the
   instruction layer costs a session only what the work in front of it needs.
 
 ### Local inference
