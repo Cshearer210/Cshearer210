@@ -32,9 +32,9 @@ re-runs the suite, and names the tests that never noticed.
 
 Agents claim work is finished that isn't. Everything I build assumes that.
 
-- **253 scripts carry their own self-test.** A gate is not trusted until it has been made to fail
+- **373 scripts carry their own self-test.** A gate is not trusted until it has been made to fail
   on purpose. A check that has never failed proves nothing.
-- **A daily regression harness of 118 checks asserts against live system state, not source code.**
+- **A daily regression harness of 192 checks asserts against live system state, not source code.**
   Code does not decay. Reality does. A fix that quietly stopped working gets caught here rather
   than assumed to still hold.
 - **UNKNOWN is a distinct result that never counts as a pass.** Absent-and-fine and
@@ -68,8 +68,8 @@ looked exactly like success. That class of silent degradation is what I build ag
 - A code knowledge graph resolving 6,424 dependency edges across 2,779 files, so the blast radius
   of a change is queryable before the change is made.
 - Context engineering under measured token budgets: I measured what always-on instructions cost
-  per session, then scoped 63 of 73 rule files to load only for the work they govern, which saves
-  roughly 155,000 tokens a session.
+  per session, then scoped 68 of 79 rule files to load only for the work they govern, so the
+  instruction layer costs a session only what the work in front of it needs.
 
 ### Local inference
 
