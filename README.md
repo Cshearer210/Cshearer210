@@ -32,9 +32,9 @@ re-runs the suite, and names the tests that never noticed.
 
 Agents claim work is finished that isn't. Everything I build assumes that.
 
-- **381 scripts carry their own self-test.** A gate is not trusted until it has been made to fail
+- **427 scripts carry their own self-test.** A gate is not trusted until it has been made to fail
   on purpose. A check that has never failed proves nothing.
-- **A daily regression harness of 192 checks asserts against live system state, not source code.**
+- **A daily regression harness of 214 checks asserts against live system state, not source code.**
   Code does not decay. Reality does. A fix that quietly stopped working gets caught here rather
   than assumed to still hold.
 - **UNKNOWN is a distinct result that never counts as a pass.** Absent-and-fine and
