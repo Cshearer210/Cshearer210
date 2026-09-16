@@ -46,6 +46,29 @@ Dial order and buying decisions are different questions: rank the call sheet by 
 (who is most likely to answer and buy now), but make purchasing decisions on
 `expected_value_cents` (what earns most per dollar spent).
 
+## The email channel (no prior consent required)
+
+`email_compliance.py` covers the one outreach path that does not require prior consent.
+Cold commercial email to US recipients is legal under CAN-SPAM as long as every message
+carries the required disclosures and every opt-out is honored.
+
+`validate_message` is a gate in the same shape as the call-side one. A message is sendable
+only if it passes all five checks: an accurate from line, a non-deceptive subject, a clear
+advertisement disclosure, a physical postal address, and a working opt-out mechanism. A
+`SuppressionList` honors opt-outs immediately and offers an audit that flags any opt-out
+older than the 10-business-day legal window. `EmailCampaign.send` validates the message
+once and, if it fails, sends to nobody — one non-compliant message must not reach a single
+recipient.
+
+Two limits are stated in the module and repeated here. It validates *federal* CAN-SPAM
+only; several states are stricter and insurance marketing has its own state content rules,
+neither modeled. And legal is not the same as effective: cold email to purchased addresses
+has poor deliverability and can burn a sending domain. Compliance is the floor.
+
+The actual transport is a Protocol (`EmailSender`) with a `DryRunSender` for testing. Wire
+in SMTP or an ESP the same way the scrub adapters take real providers. Per-violation
+penalties run to $53,088 per email, which is why the send guard fails closed.
+
 ## The numbers are not yet facts
 
 Every constant in `scoring.py` is a published industry benchmark, and most of them originate
