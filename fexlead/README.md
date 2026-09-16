@@ -9,6 +9,31 @@ they sell. The one thing it will not do is manufacture leads by scraping people 
 opted in. It takes leads you already bought, proves each one is legally callable right now,
 ranks them by expected value, and writes a call sheet an agent can actually work from.
 
+## Two-sided: first-party marketing and B2B prospecting
+
+Beyond the final expense pipeline, this repo now carries the pieces of a marketing
+toolkit you can attach to sites you build for clients.
+
+**First-party campaigns** — a client's own customers, who gave their info on the
+client's site. `capture.py` collects them; `email_compliance.py` (CAN-SPAM) and
+`sms_compliance.py` (TCPA) send to them. The rule that separates the two channels and
+gets small businesses sued: you may cold-email under CAN-SPAM without prior consent,
+but you may **not** cold-text. `sms_compliance.py` is built around a consent ledger --
+a text goes only to a recipient with a consent record on file, honors STOP
+immediately, and holds any send outside 8am-9pm local or where the timezone is
+unknown.
+
+**B2B prospecting** — `b2b/` sources leads from *public business* data, which the law
+treats very differently from consumer PII. `sources.py` defines pluggable source
+adapters (a real SEC EDGAR Form D adapter for freshly-funded companies, plus an
+in-memory source for tests); `pipeline.run_scrape_job` turns a `ScrapeCriteria`
+(count, states, industries, recency, contact-required) into a deduplicated, verified,
+clean Excel file -- the "select options, click Fetch, download leads" path. A source
+that fails is reported, never silently degraded to "no results". Every contact carries
+a provenance field, because a named person's work email is personal data under CCPA
+(the B2B exemption expired in 2023) and a buyer must know a published business fact
+from an appended guess.
+
 ## The lead-vendor model, and why scraping is not one
 
 The product a final expense agent buys is not a name and a phone number. It is the
