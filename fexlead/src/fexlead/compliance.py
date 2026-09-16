@@ -23,6 +23,13 @@ from .schema import Check, DNCStatus, Lead
 # at least every 31 days. A scrub older than that is not a scrub.
 DNC_SCRUB_MAX_AGE_DAYS = 31
 
+# TrustedForm certificates are permanently deleted 72 hours after creation unless
+# someone claims or extends them. This is the single most important fact when
+# buying aged leads: if the originating vendor never claimed the certificate, the
+# URL on the record is a dead link and the consent behind it is unprovable. Past
+# this window an unclaimed certificate is treated as gone, not as unverified.
+TRUSTEDFORM_CLAIM_WINDOW_HOURS = 72
+
 # Federal TCPA calling window, in the called party's local time.
 FEDERAL_WINDOW = (8, 21)  # 8:00am - 9:00pm
 
@@ -203,7 +210,22 @@ def check_consent(lead: Lead, now: datetime) -> CheckResult:
             "TrustedForm certificate was never claimed, so the URL no longer proves consent",
         )
     if c.trustedform_url and c.cert_claimed is None:
-        return CheckResult("consent", Check.UNKNOWN, "TrustedForm claim status unknown")
+        hours_old = (now - c.consent_timestamp).total_seconds() / 3600.0
+        if hours_old > TRUSTEDFORM_CLAIM_WINDOW_HOURS:
+            # Past 72 hours an unclaimed certificate has been deleted upstream.
+            # Calling this UNKNOWN would imply someone could still go look.
+            return CheckResult(
+                "consent",
+                Check.BLOCK,
+                f"TrustedForm certificate is {hours_old / 24:.0f} days old with no claim on record; "
+                f"unclaimed certificates are deleted after {TRUSTEDFORM_CLAIM_WINDOW_HOURS}h",
+            )
+        return CheckResult(
+            "consent",
+            Check.UNKNOWN,
+            f"TrustedForm claim status unknown, {hours_old:.0f}h into the "
+            f"{TRUSTEDFORM_CLAIM_WINDOW_HOURS}h claim window",
+        )
     return CheckResult("consent", Check.PASS, "written consent documented and retained")
 
 

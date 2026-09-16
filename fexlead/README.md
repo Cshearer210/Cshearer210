@@ -77,6 +77,43 @@ Vendors are not trusted about their own leads. A payload asserting `dnc_status: 
 recorded as an unmapped field and the lead is marked `NOT_SCRUBBED`; a certificate URL in a
 payload never implies the certificate was claimed and retained. Both are pinned by tests.
 
+## The aged-lead certificate trap
+
+TrustedForm certificates are permanently deleted 72 hours after creation unless someone
+claims or extends them. This is the thing that can quietly break the aged-lead strategy.
+
+If the originating vendor never claimed the certificate, the URL riding on a 60-day-old
+lead is a dead link, and the consent behind it is unprovable the moment anyone asks. The
+lead looks fully documented in a spreadsheet and is worth nothing in a defense.
+
+The gate distinguishes three states rather than two. Inside the 72-hour window an
+unclaimed certificate is UNKNOWN, because someone can still go claim it. Past the window
+it is BLOCK, because it is gone and no amount of asking recovers it. A Jornaya LeadiD is
+not subject to this rule and is not treated as if it were.
+
+The purchasing consequence: before buying any aged list, ask the vendor whether they
+claimed and retained the certificates, and whether they will transfer them. A vendor who
+cannot answer is selling records whose consent cannot be proven.
+
+## What the compliance stack actually costs
+
+Per-seat, for one producer. Current as of September 2026.
+
+| Item | Cost | Notes |
+|---|---|---|
+| National DNC Registry | free for 5 area codes | $85/area code in FY2027, $23,425 nationwide cap |
+| Reassigned Numbers Database | $10/mo for 1,000 queries | FCC safe harbor, but only if you actually query it |
+| TrustedForm | $10/mo minimum, ~$0.12-0.15/cert | claim within 72h or it is gone |
+| Litigator scrub | bundled with most scrub vendors | |
+| Internal suppression list | free | you maintain it, and it is required regardless |
+
+FY2027 fees take effect October 1, 2026.
+
+A producer working a handful of states stays inside the five free area codes and pays
+almost nothing for DNC access. The Reassigned Numbers Database is the cheapest real
+liability reduction available at $10/month, and its safe harbor only protects callers who
+actually queried it, which is why the gate treats an unqueried number as UNKNOWN.
+
 ## Every gate is made to fail on purpose
 
 `tests/test_gate_fails_on_purpose.py` ends with a meta-test that records every

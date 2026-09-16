@@ -120,15 +120,20 @@ def test_consent_blocks_on_unclaimed_expired_certificate():
     assert status_of(res, "consent") is Check.BLOCK
 
 
-def test_consent_unknown_when_claim_status_missing():
+def test_jornaya_only_lead_is_not_subject_to_the_trustedform_claim_window():
+    """A LeadiD token is not a TrustedForm certificate and does not expire at 72h.
+
+    An aged lead carrying only a Jornaya token must not be blocked by a rule that
+    describes a different vendor's retention behavior.
+    """
     c = Consent(
-        trustedform_url="https://cert.trustedform.com/testcert",
-        consent_timestamp=NOW - timedelta(days=20),
+        jornaya_leadid="A1B2C3D4E5F6A7B8",
+        consent_timestamp=NOW - timedelta(days=200),
         consent_language="agreed",
         cert_claimed=None,
     )
     res = record(gate().evaluate(clean_lead(consent=c), NOW))
-    assert status_of(res, "consent") is Check.UNKNOWN
+    assert status_of(res, "consent") is Check.PASS
 
 
 # --- dnc --------------------------------------------------------------------
@@ -283,3 +288,33 @@ def test_every_check_has_been_made_to_fail():
         "these checks were never observed returning every status; "
         f"a check that cannot be made to fail is not a check: {incomplete}"
     )
+
+
+# --- TrustedForm 72-hour claim window ---------------------------------------
+
+def test_unclaimed_certificate_inside_window_is_unknown():
+    """Still claimable, so the answer is 'go claim it', not 'this is dead'."""
+    c = Consent(
+        trustedform_url="https://cert.trustedform.com/testcert",
+        consent_timestamp=NOW - timedelta(hours=12),
+        consent_language="agreed",
+        cert_claimed=None,
+    )
+    res = record(gate().evaluate(clean_lead(consent=c), NOW))
+    check = next(x for x in res.checks if x.name == "consent")
+    assert check.status is Check.UNKNOWN
+    assert "claim window" in check.reason
+
+
+def test_unclaimed_certificate_past_window_is_blocked():
+    """The aged-lead trap: the certificate was deleted upstream and is not recoverable."""
+    c = Consent(
+        trustedform_url="https://cert.trustedform.com/testcert",
+        consent_timestamp=NOW - timedelta(days=45),
+        consent_language="agreed",
+        cert_claimed=None,
+    )
+    res = record(gate().evaluate(clean_lead(consent=c), NOW))
+    check = next(x for x in res.checks if x.name == "consent")
+    assert check.status is Check.BLOCK
+    assert "deleted after 72h" in check.reason
