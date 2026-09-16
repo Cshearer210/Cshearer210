@@ -2,9 +2,42 @@
 
 A compliance gate, scoring model, and call-sheet exporter for final expense insurance leads.
 
-Built for an individual licensed producer working purchased leads. It does not acquire
-leads. It takes leads you already bought, proves each one is legally callable right now,
+Built to run either side of the final expense lead market. A licensed producer can
+point it at leads they bought to make them callable and ranked; a lead vendor can point
+it at their own capture funnel to generate, verify, and prove the consent behind leads
+they sell. The one thing it will not do is manufacture leads by scraping people who never
+opted in. It takes leads you already bought, proves each one is legally callable right now,
 ranks them by expected value, and writes a call sheet an agent can actually work from.
+
+## The lead-vendor model, and why scraping is not one
+
+The product a final expense agent buys is not a name and a phone number. It is the
+*consent* -- a TrustedForm or Jornaya certificate proving the person asked to be
+contacted. That certificate is the agent's TCPA defense, and it is most of what the
+$8-$80 per lead actually pays for. A scraped record has no certificate, so it is not a
+lead a supervised agent can buy: IMOs audit lead sources, and an agent caught dialing
+scraped data loses their appointment. You cannot scrape your way into being a lead
+vendor, because the product is the opt-in, not the contact info.
+
+So the funnel that produces sellable inventory is:
+
+    ad (Meta / Google)  ->  landing page  ->  consent + certificate captured
+                                              ->  intake  ->  scrub  ->  verify
+                                              ->  score  ->  deliver / sell
+
+`capture/landing.html` is that landing page (a template to brand), and `capture.py`
+turns a submission into a first-party exclusive lead. Because you own the capture, you
+can claim the certificate server-side immediately, so your leads are born with
+`cert_claimed=True` -- worth more than any aged list you can buy, where the certificate
+was usually never claimed and has since been deleted. `capture.py` refuses to mark a
+submission sellable if it has no certificate token: consent is the product, and a
+capture without it is nothing to sell.
+
+The economics are real but they are an ad business, not a data-scraping trick. Your cost
+is customer acquisition (Meta final expense leads commonly run $8-$20 to generate); your
+revenue is the sale price of the lead. The margin is the spread, and the compliance and
+verification in the rest of this package is what lets you sell exclusive rather than
+racing everyone else to the bottom on shared, scraped junk.
 
 ## What this deliberately does not do
 
