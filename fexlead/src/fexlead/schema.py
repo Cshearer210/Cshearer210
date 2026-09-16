@@ -54,6 +54,21 @@ class DNCStatus(str, Enum):
     NOT_SCRUBBED = "not_scrubbed"
 
 
+class ReassignedStatus(str, Enum):
+    """Result of an FCC Reassigned Numbers Database query.
+
+    The safe harbor against "wrong number" TCPA liability applies only to callers
+    who actually queried the database. NOT_QUERIED is therefore never a pass: a
+    number you did not check is a number with no safe harbor, which is different
+    from a number you checked and found still belongs to the consumer.
+    """
+
+    SAME_SUBSCRIBER = "same_subscriber"      # not reassigned since consent; safe to call
+    REASSIGNED = "reassigned"                # number changed hands since consent; do not call
+    NO_DATA = "no_data"                      # queried, but the DB had no record for the date
+    NOT_QUERIED = "not_queried"
+
+
 @dataclass
 class Consent:
     """Proof that the consumer asked to be contacted.
@@ -132,6 +147,8 @@ class Lead:
     dnc_status: DNCStatus = DNCStatus.NOT_SCRUBBED
     dnc_checked_at: Optional[datetime] = None
     litigator_flag: Optional[bool] = None
+    reassigned_status: ReassignedStatus = ReassignedStatus.NOT_QUERIED
+    reassigned_checked_at: Optional[datetime] = None
 
     def age_days(self, now: Optional[datetime] = None) -> Optional[float]:
         """Days since the consumer submitted the form. None if we do not know."""

@@ -15,6 +15,7 @@ from .compliance import ComplianceGate
 from .export import ScoredLead, write_xlsx
 from .sample import generate
 from .scoring import Scorer
+from .scrub import InMemoryDNC, InMemoryLitigator, InMemoryReassigned, ScrubRunner
 
 
 class InMemorySuppression:
@@ -48,6 +49,12 @@ def main() -> None:
         now = now.replace(tzinfo=timezone.utc)
     leads = generate(args.count, now=now)
 
+    # Demonstrate the scrub step. Real adapters replace these three mocks; the
+    # rest of the pipeline does not change. A number the mock cannot reach is
+    # left unscrubbed, and the gate holds it.
+    scrub = ScrubRunner(dnc=InMemoryDNC(), litigator=InMemoryLitigator(), reassigned=InMemoryReassigned())
+    report = scrub.scrub(leads, now)
+
     gate = ComplianceGate(suppression=InMemorySuppression(), call_history=InMemoryCallHistory())
     scorer = Scorer(commission_per_sale_cents=args.commission)
 
@@ -66,6 +73,7 @@ def main() -> None:
     ev = sum(s.score.expected_value_cents for s in scored if s.score) / 100
 
     print(f"{len(leads)} leads in, evaluated at {now.strftime('%Y-%m-%d %H:%M %Z')}")
+    print(f"  scrub: {report.summary()}")
     print(f"  callable : {callable_n}")
     print(f"  held (fixable, UNKNOWN) : {unknown_n}")
     print(f"  held (hard BLOCK)       : {blocked_n}")

@@ -17,7 +17,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Callable, Optional, Protocol, Sequence
 from zoneinfo import ZoneInfo
 
-from .schema import Check, DNCStatus, Lead
+from .schema import Check, DNCStatus, Lead, ReassignedStatus
 
 # The FTC Telemarketing Sales Rule requires the national registry to be re-scrubbed
 # at least every 31 days. A scrub older than that is not a scrub.
@@ -279,6 +279,40 @@ def check_litigator(lead: Lead, now: datetime) -> CheckResult:
     return CheckResult("litigator", Check.PASS, "not a known litigator")
 
 
+def check_reassigned_number(lead: Lead, now: datetime) -> CheckResult:
+    """FCC Reassigned Numbers Database status.
+
+    The safe harbor only protects a caller who actually queried the database, so a
+    number that was never queried is UNKNOWN, not clear. A number the DB reports
+    as reassigned since the consent date belongs to someone who never consented,
+    which is a wrong-number call waiting to happen -- BLOCK.
+    """
+    status = lead.reassigned_status
+    if status is ReassignedStatus.NOT_QUERIED:
+        return CheckResult(
+            "reassigned_number",
+            Check.UNKNOWN,
+            "number not checked against the FCC Reassigned Numbers Database; no safe harbor",
+        )
+    if lead.reassigned_checked_at is None:
+        return CheckResult("reassigned_number", Check.UNKNOWN, "query result present but no query timestamp")
+    if status is ReassignedStatus.REASSIGNED:
+        return CheckResult(
+            "reassigned_number",
+            Check.BLOCK,
+            "number was reassigned after the consent date; the current subscriber never consented",
+        )
+    if status is ReassignedStatus.NO_DATA:
+        # The DB had no record. The safe harbor still attaches to the query, so
+        # this is a pass, but the reason records that it was thin.
+        return CheckResult(
+            "reassigned_number",
+            Check.PASS,
+            "database had no reassignment record for this number and date; safe harbor attaches to the query",
+        )
+    return CheckResult("reassigned_number", Check.PASS, "same subscriber since consent")
+
+
 def check_calling_window(lead: Lead, now: datetime) -> CheckResult:
     """Enforce the calling window in the called party's local time, not the agent's."""
     tz = resolve_timezone(lead)
@@ -355,6 +389,7 @@ class ComplianceGate:
             check_dnc(lead, now),
             check_internal_suppression(lead, now, self.suppression),
             check_litigator(lead, now),
+            check_reassigned_number(lead, now),
             check_calling_window(lead, now),
             check_state_frequency_cap(lead, now, self.call_history, self.subject),
         ]

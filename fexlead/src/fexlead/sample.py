@@ -12,7 +12,7 @@ from __future__ import annotations
 import random
 from datetime import datetime, timedelta, timezone
 
-from .schema import Consent, DNCStatus, Lead, LeadType, SelfReported
+from .schema import Consent, DNCStatus, Lead, LeadType, ReassignedStatus, SelfReported
 
 FIRST = ["Alex", "Bobbie", "Casey", "Dana", "Ellis", "Frankie", "Gale", "Harper",
          "Indy", "Jamie", "Kerry", "Lee", "Morgan", "Noel", "Quinn", "Reese",
@@ -99,6 +99,19 @@ def generate(n: int = 100, seed: int = 20260916, now: datetime | None = None) ->
         else:
             dnc_status, checked = DNCStatus.NOT_SCRUBBED, None
 
+        # Reassigned Numbers Database spread. Most numbers still belong to the
+        # consumer; a realistic slice were reassigned or were queried with the DB
+        # holding no record, and some were never queried at all.
+        rnd = rng.random()
+        if rnd < 0.72:
+            reassigned, rnd_checked = ReassignedStatus.SAME_SUBSCRIBER, now
+        elif rnd < 0.80:
+            reassigned, rnd_checked = ReassignedStatus.NO_DATA, now
+        elif rnd < 0.88:
+            reassigned, rnd_checked = ReassignedStatus.REASSIGNED, now
+        else:
+            reassigned, rnd_checked = ReassignedStatus.NOT_QUERIED, None
+
         leads.append(Lead(
             lead_id=f"SYN-{i:04d}",
             vendor=rng.choice(["vendor-alpha", "vendor-bravo", "vendor-charlie"]),
@@ -124,6 +137,8 @@ def generate(n: int = 100, seed: int = 20260916, now: datetime | None = None) ->
             received_at=now,
             dnc_status=dnc_status,
             dnc_checked_at=checked,
+            reassigned_status=reassigned,
+            reassigned_checked_at=rnd_checked,
             cost_cents=rng.randint(lo, hi),
             shared_with_count=1 if lt is LeadType.EXCLUSIVE_WEB else rng.choice([1, 2, 3, 4, 5]),
             litigator_flag=None if rng.random() < 0.15 else (rng.random() < 0.02),

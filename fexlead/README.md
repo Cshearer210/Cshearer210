@@ -144,11 +144,32 @@ to a real person. It is a schema exerciser, not a lead source.
 Replace `generate()` in `cli.py` with `intake.from_csv()` or `intake.from_payloads()`.
 Nothing downstream changes.
 
-Four integration points are stubbed and need real providers before this dials anything:
+The scrub step lives in `scrub.py`. `ScrubRunner` applies three adapters to a batch of
+leads and fills their compliance fields, recording clean and failed counts separately.
+Reference in-memory adapters (`InMemoryDNC`, `InMemoryLitigator`, `InMemoryReassigned`)
+make the pipeline runnable today; swapping in real providers is a one-line change per
+adapter and nothing downstream moves.
 
-- **DNC scrubbing** — federal plus state registries, re-scrubbed at least every 31 days.
-  Set `dnc_status` and `dnc_checked_at` from the scrub, never from the vendor.
-- **Litigator screening** — sets `litigator_flag`. `None` means unscreened, which holds.
+The governing rule is at the adapter boundary: a lookup that cannot complete must **raise**,
+never return a clean-looking default. `ScrubRunner` catches the raise and leaves the field
+unscrubbed, which the gate reads as UNKNOWN. A provider outage degrades to "we do not know",
+never to "everyone is clear" — the same failure this package exists to prevent, enforced
+where real outages actually happen. `test_dnc_outage_leaves_lead_unscrubbed_not_clear`
+pins it.
+
+Real providers to implement against the adapter Protocols:
+
+- **`DNCAdapter`** — Blacklist Alliance, PossibleNOW, or DNC.com. Federal plus state
+  registries, re-scrubbed at least every 31 days. Many bundle litigator scrub in the same
+  call.
+- **`LitigatorAdapter`** — usually the same vendor as DNC. `None` means unscreened, which holds.
+- **`ReassignedAdapter`** — the FCC Reassigned Numbers Database via SomosGov ($10/mo for the
+  extra-small tier). The safe harbor attaches only to numbers you actually query, which is
+  why an unqueried number is UNKNOWN.
+
+Two integration points remain live-lookup rather than batch-scrub, because they must be
+checked at call time, not the night before:
+
 - **Suppression store** — implement `SuppressionSource.contains`. It must raise rather than
   return an empty set when unreachable, or you rebuild the bug this whole design is against.
 - **Call history** — implement `CallHistorySource.calls_in_last_24h` for the Florida and

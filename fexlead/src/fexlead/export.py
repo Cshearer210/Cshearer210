@@ -46,7 +46,7 @@ CALL_COLUMNS = [
     ("Call Window (local)", 19), ("Why This Lead", 52), ("Est. Value", 11),
     ("Close Prob.", 11), ("Source", 16), ("Lead Type", 15), ("Lead Age (d)", 12),
     ("Consent Cert", 30), ("Consent Date", 20), ("DNC Status", 14),
-    ("DNC Checked", 20), ("State Flags", 26),
+    ("DNC Checked", 20), ("Reassigned", 16), ("State Flags", 26),
 ]
 
 HELD_COLUMNS = [
@@ -114,6 +114,7 @@ def build_workbook(
             lead.consent.consent_timestamp.strftime("%Y-%m-%d %H:%M") if lead.consent.consent_timestamp else None,
             lead.dnc_status.value,
             lead.dnc_checked_at.strftime("%Y-%m-%d %H:%M") if lead.dnc_checked_at else None,
+            lead.reassigned_status.value,
             "; ".join(item.gate.warnings) or None,
         ])
 
@@ -159,6 +160,8 @@ def build_workbook(
         ("calling_window", Check.BLOCK): "Legal, just not right now. Re-queue for the local window.",
         ("state_frequency_cap", Check.UNKNOWN): "Connect call history so the FL/OK 3-per-24h cap can be counted.",
         ("state_frequency_cap", Check.BLOCK): "Daily cap reached. Re-queue for tomorrow.",
+        ("reassigned_number", Check.UNKNOWN): "Query the FCC Reassigned Numbers Database to earn the safe harbor.",
+        ("reassigned_number", Check.BLOCK): "Number changed hands since consent. Do not call; the new subscriber never opted in.",
     }
     tally: Counter = Counter()
     for item in held:

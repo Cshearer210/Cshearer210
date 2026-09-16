@@ -19,7 +19,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from fexlead.compliance import ComplianceGate, GateResult  # noqa: E402
-from fexlead.schema import Check, Consent, DNCStatus, Lead, LeadType  # noqa: E402
+from fexlead.schema import Check, Consent, DNCStatus, Lead, LeadType, ReassignedStatus  # noqa: E402
 
 NOW = datetime(2026, 9, 16, 17, 0, tzinfo=timezone.utc)      # 12:00 CDT in Chicago
 NOW_NIGHT = datetime(2026, 9, 16, 4, 0, tzinfo=timezone.utc)  # 23:00 CDT in Chicago
@@ -78,6 +78,8 @@ def clean_lead(**overrides) -> Lead:
         dnc_status=DNCStatus.CLEAR,
         dnc_checked_at=NOW - timedelta(days=2),
         litigator_flag=False,
+        reassigned_status=ReassignedStatus.SAME_SUBSCRIBER,
+        reassigned_checked_at=NOW - timedelta(days=2),
     )
     for k, v in overrides.items():
         setattr(lead, k, v)
@@ -190,6 +192,27 @@ def test_litigator_unknown_when_unscreened():
     assert status_of(res, "litigator") is Check.UNKNOWN
 
 
+# --- reassigned number ------------------------------------------------------
+
+def test_reassigned_number_unknown_when_not_queried():
+    """No query means no safe harbor, which must not read as clear."""
+    res = record(gate().evaluate(
+        clean_lead(reassigned_status=ReassignedStatus.NOT_QUERIED, reassigned_checked_at=None), NOW))
+    assert status_of(res, "reassigned_number") is Check.UNKNOWN
+    assert not res.callable_now
+
+
+def test_reassigned_number_blocks_when_reassigned():
+    res = record(gate().evaluate(clean_lead(reassigned_status=ReassignedStatus.REASSIGNED), NOW))
+    assert status_of(res, "reassigned_number") is Check.BLOCK
+
+
+def test_reassigned_number_no_data_still_passes_under_safe_harbor():
+    """The safe harbor attaches to the act of querying, even when the DB is thin."""
+    res = record(gate().evaluate(clean_lead(reassigned_status=ReassignedStatus.NO_DATA), NOW))
+    assert status_of(res, "reassigned_number") is Check.PASS
+
+
 # --- calling window ---------------------------------------------------------
 
 def test_calling_window_blocks_outside_hours():
@@ -273,8 +296,8 @@ def test_every_check_has_been_made_to_fail():
     failure coverage fails here instead of shipping as an always-green gate.
     """
     expected = {
-        "consent", "dnc", "internal_suppression",
-        "litigator", "calling_window", "state_frequency_cap",
+        "consent", "dnc", "internal_suppression", "litigator",
+        "reassigned_number", "calling_window", "state_frequency_cap",
     }
     missing_checks = expected - OBSERVED.keys()
     assert not missing_checks, f"checks never exercised at all: {sorted(missing_checks)}"
