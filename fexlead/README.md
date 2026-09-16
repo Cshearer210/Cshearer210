@@ -80,6 +80,35 @@ They are good enough to rank leads against each other. They are not a revenue fo
 Feed real close outcomes into `Scorer(measured_close_rates=...)` and the basis flips to
 `BACKTESTED`. Until then the workbook says so on its face.
 
+## How the data is verified (the accuracy question)
+
+You cannot guarantee accuracy on data scraped about a stranger. You can verify it when
+the person entered it themselves and you then check each field against an authoritative
+source. That is the whole reason this pipeline is built on opt-in leads: a scraped record
+has nothing to verify against, while an opt-in record carries a phone the person typed, an
+email they control, and a consent certificate proving they typed it.
+
+`verification.py` checks each contact field and grades the record:
+
+- **Phone** — `phonenumbers` (Google's libphonenumber) confirms the number is a valid,
+  assigned US number and reports its line type and area-code timezone. A malformed or
+  unassigned number is BLOCK; a toll-free or premium-rate number is flagged UNKNOWN as
+  implausible for a residential prospect.
+- **Email** — syntax is checked offline; deliverability (does the domain accept mail) is
+  checked over DNS. A DNS outage returns UNKNOWN, never PASS.
+- **Address** — completeness only. Real USPS correctness needs a CASS adapter, so a
+  complete-looking address is UNKNOWN-verified, not verified.
+
+The grade (A/B/C/F) and `has_verified_channel` answer the practical question: is there a
+way to reach this person that we have *verified*, not merely received. What verification
+cannot tell you is whether the number still belongs to this person — that is exactly what
+the DNC and Reassigned Numbers checks in the gate are for. Accuracy that could not be
+confirmed is reported as UNKNOWN, the same rule the rest of the package runs on.
+
+The phone's area-code timezone also feeds `resolve_timezone` as a fallback, so a lead in a
+multi-zone state with no ZIP match still gets a calling window from its number rather than
+being held as UNKNOWN.
+
 ## The compliance gate
 
 Six checks run on every lead: consent, DNC, internal suppression, litigator screening,

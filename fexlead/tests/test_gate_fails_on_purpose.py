@@ -221,8 +221,10 @@ def test_calling_window_blocks_outside_hours():
 
 
 def test_calling_window_unknown_when_timezone_unresolvable():
-    """Kentucky spans two zones and is not modeled, so it must not be guessed."""
-    res = record(gate().evaluate(clean_lead(state="KY", postal_code="40201"), NOW))
+    """Kentucky spans two zones and is not modeled. With no ZIP match and no phone
+    to fall back on, the timezone is genuinely unknown and must not be guessed."""
+    res = record(gate().evaluate(
+        clean_lead(state="KY", postal_code="40201", phone=None), NOW))
     assert status_of(res, "calling_window") is Check.UNKNOWN
 
 

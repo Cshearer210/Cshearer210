@@ -25,6 +25,7 @@ from openpyxl.utils import get_column_letter
 from .compliance import GateResult, resolve_timezone
 from .schema import Check, Lead
 from .scoring import ScoreBasis, ScoreResult
+from .verification import DataQuality
 
 HEADER_FILL = PatternFill("solid", fgColor="1F3864")
 HEADER_FONT = Font(color="FFFFFF", bold=True, size=11)
@@ -38,13 +39,14 @@ class ScoredLead:
     lead: Lead
     gate: GateResult
     score: Optional[ScoreResult] = None
+    quality: Optional[DataQuality] = None
 
 
 CALL_COLUMNS = [
     ("Rank", 6), ("Score", 8), ("Name", 22), ("Age", 6), ("Phone", 14),
     ("Email", 26), ("Address", 26), ("City", 16), ("State", 7), ("ZIP", 8),
     ("Call Window (local)", 19), ("Why This Lead", 52), ("Est. Value", 11),
-    ("Close Prob.", 11), ("Source", 16), ("Lead Type", 15), ("Lead Age (d)", 12),
+    ("Close Prob.", 11), ("Data Quality", 13), ("Source", 16), ("Lead Type", 15), ("Lead Age (d)", 12),
     ("Consent Cert", 30), ("Consent Date", 20), ("DNC Status", 14),
     ("DNC Checked", 20), ("Reassigned", 16), ("State Flags", 26),
 ]
@@ -107,6 +109,7 @@ def build_workbook(
             sc.rationale,
             round(sc.expected_value_cents / 100.0, 2),
             f"{sc.p_close:.1%}",
+            (f"{item.quality.grade()} ({item.quality.summary()})" if item.quality else None),
             lead.vendor,
             lead.lead_type.value,
             round(age_days, 1) if age_days is not None else None,

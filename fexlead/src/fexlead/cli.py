@@ -16,6 +16,7 @@ from .export import ScoredLead, write_xlsx
 from .sample import generate
 from .scoring import Scorer
 from .scrub import InMemoryDNC, InMemoryLitigator, InMemoryReassigned, ScrubRunner
+from .verification import verify_lead
 
 
 class InMemorySuppression:
@@ -58,11 +59,14 @@ def main() -> None:
     gate = ComplianceGate(suppression=InMemorySuppression(), call_history=InMemoryCallHistory())
     scorer = Scorer(commission_per_sale_cents=args.commission)
 
+    # Deliverability is DNS-bound; keep it off for a fast, deterministic demo.
+    # In production leave it on so a dead email domain is caught.
     scored = []
     for lead in leads:
         g = gate.evaluate(lead, now)
+        q = verify_lead(lead, check_deliverability=False)
         s = scorer.score(lead, now) if g.callable_now else None
-        scored.append(ScoredLead(lead=lead, gate=g, score=s))
+        scored.append(ScoredLead(lead=lead, gate=g, score=s, quality=q))
 
     write_xlsx(scored, args.out, now=now)
 
@@ -79,6 +83,9 @@ def main() -> None:
     print(f"  held (hard BLOCK)       : {blocked_n}")
     print(f"  lead spend represented  : ${spend:,.2f}")
     print(f"  expected value, callable only : ${ev:,.2f}")
+    from collections import Counter
+    grades = Counter(s.quality.grade() for s in scored if s.quality)
+    print(f"  data quality (all leads): " + ", ".join(f"{g}:{grades[g]}" for g in sorted(grades)))
     print(f"written: {args.out}")
 
 

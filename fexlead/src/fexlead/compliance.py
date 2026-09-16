@@ -179,14 +179,42 @@ def resolve_timezone(lead: Lead) -> Optional[ZoneInfo]:
     state = (lead.state or "").upper().strip()
     zip3 = (lead.postal_code or "").strip()[:3]
 
+    # 1. ZIP prefix: most precise signal for physical location.
     if zip3 and zip3 in ZIP_PREFIX_TZ:
         return ZoneInfo(ZIP_PREFIX_TZ[zip3])
-    if state in AMBIGUOUS_STATE_DEFAULT_TZ:
-        return ZoneInfo(AMBIGUOUS_STATE_DEFAULT_TZ[state])
-    if state in AMBIGUOUS_TZ_STATES:
-        return None
+    # 2. Single-zone state: unambiguous.
     if state in STATE_TZ:
         return ZoneInfo(STATE_TZ[state])
+    # 3. Multi-zone state with a modeled default (e.g. TX -> Central).
+    if state in AMBIGUOUS_STATE_DEFAULT_TZ:
+        return ZoneInfo(AMBIGUOUS_STATE_DEFAULT_TZ[state])
+    # 4. Fall back to the phone's area-code timezone. This resolves multi-zone
+    #    states we did not model (e.g. KY) rather than returning UNKNOWN. Caveat:
+    #    a mobile number's area code reflects where the line was issued, which can
+    #    differ from where the consumer now lives, so this ranks below address.
+    tz = _phone_area_code_timezone(lead.phone)
+    if tz is not None:
+        return tz
+    # 5. Genuinely unresolvable. UNKNOWN is correct; do not guess.
+    return None
+
+
+def _phone_area_code_timezone(phone: Optional[str]) -> Optional[ZoneInfo]:
+    if not phone:
+        return None
+    try:
+        import phonenumbers
+        from phonenumbers import timezone as pn_timezone
+        parsed = phonenumbers.parse(phone, "US")
+        if not phonenumbers.is_valid_number(parsed):
+            return None
+        zones = pn_timezone.time_zones_for_number(parsed)
+        # Only trust an unambiguous, single-zone answer. libphonenumber returns
+        # multiple zones for some area codes, which is no better than not knowing.
+        if len(zones) == 1 and zones[0] != "Etc/Unknown":
+            return ZoneInfo(zones[0])
+    except Exception:  # noqa: BLE001 - any parse/lookup failure means "we do not know"
+        return None
     return None
 
 
